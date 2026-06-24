@@ -1,0 +1,22 @@
+# dependencies
+node_modules/
+
+# secrets / env
+.env
+.env.local
+*.pem
+
+# python caches
+__pycache__/
+*.pyc
+
+# build / packaging artifacts
+*.tar.gz
+dist/
+
+# scratch / raw run dumps (kept locally, not part of the submission)
+scratch_*.json
+*_run.json
+*_ids.txt
+
+.DS_Store

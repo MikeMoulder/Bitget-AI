@@ -1,0 +1,86 @@
+name: adaptive-regime-agent
+display_name: "Adaptive Regime AI Agent"
+version: "1.0.0"
+description: "LLM agent that reads BTC regime, funding and positioning each cycle and decides long, short, or flat with a written rationale"
+long_description: |
+  This Playbook is an AI agent for BTC perpetual futures. Its thesis is that the
+  hardest part of discretionary futures trading is not computing one indicator,
+  it is synthesizing many conflicting signals — price regime, funding-rate
+  behavior, open-interest shifts, and crowd positioning — into a single coherent
+  view under uncertainty. It aims to capture that judgement by assembling a
+  fresh market briefing from managed data each cycle and asking a bounded
+  language model to reason over it like a disciplined analyst, returning a
+  decision together with the reasoning behind it rather than a black-box number.
+
+  Entry is the model's call. The agent is instructed to open long only when the
+  evidence it is shown leans bullish on balance, to open short only when the
+  evidence leans bearish, and to weight conflicting inputs explicitly. It is
+  told to prefer doing nothing when the picture is mixed, so a flat stance is a
+  legitimate and common output rather than a failure to act.
+
+  Exit and risk posture are also the model's call within guardrails. The agent
+  is prompted to close or stand aside when its own thesis weakens, when
+  positioning looks crowded against it, or when funding makes holding expensive,
+  and to take profit when an extended move shows exhaustion. It always returns a
+  confidence level so a subscriber can size or ignore the signal accordingly.
+
+  Subscribers can adjust a small set of controls. A risk-appetite setting shifts
+  the agent between cautious and assertive behavior and changes how readily it
+  takes a position. A lookback setting changes how much recent history the agent
+  reviews before deciding. The trading symbol can also be set to a supported
+  pair. Raising assertiveness produces more frequent, larger-conviction calls
+  and therefore more exposure.
+
+  The risks are real. This is a live, signal-only agent with no historical
+  backtest, because open-ended model reasoning cannot be faithfully replayed.
+  Language models can be confidently wrong, regimes can break faster than any
+  briefing captures, and live execution pays fees and slippage. Treat the
+  signals as one analyst's opinion, never as a guarantee, and only act with
+  capital you can afford to lose.
+market_type: contract
+trading_symbols: ["BTCUSDT"]
+tags: ["ai-agent", "llm", "adaptive", "regime", "btc", "contract"]
+
+schedule:
+  cron: "0 */4 * * *"
+  tz: "Asia/Shanghai"
+
+decision_mode: llm_assisted
+backtest_support: none
+runtime_profile: llm_bounded
+execution_mode: signal_only
+follow_trade_supported: false
+official_evidence_kind: paper
+
+strategy_config:
+  trading_symbols: ["BTCUSDT"]
+  lookback_hours: 168
+  risk_appetite: "balanced"
+  model_temperature: 0.2
+
+user_config_schema:
+  trading_symbols:
+    type: array
+    item_type: string
+    default: ["BTCUSDT"]
+    options: ["BTCUSDT", "ETHUSDT", "SOLUSDT"]
+    aliases:
+      btc: BTCUSDT
+      bitcoin: BTCUSDT
+      eth: ETHUSDT
+      ethereum: ETHUSDT
+      sol: SOLUSDT
+    min_items: 1
+    max_items: 1
+    label: "Trading symbol"
+  risk_appetite:
+    type: string
+    default: "balanced"
+    options: ["conservative", "balanced", "aggressive"]
+    label: "Risk appetite"
+  lookback_hours:
+    type: integer
+    default: 168
+    min: 48
+    max: 336
+    label: "Review lookback (hours)"

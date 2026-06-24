@@ -1,0 +1,91 @@
+name: range-reversion-scalper
+display_name: "BTC Range Reversion Scalper"
+version: "1.0.0"
+description: "Mean-reversion scalper on BTC perpetuals: fades statistical extremes inside ranges and exits at the mean for a high hit rate"
+long_description: |
+  This Playbook is a mean-reversion scalper on BTC perpetual futures. Its thesis
+  is that for much of the time the market is not trending but oscillating inside
+  a range, and inside those ranges price repeatedly stretches away from its
+  recent average and then snaps back. The strategy is built to harvest that
+  snap-back behavior: it waits for price to reach a statistical extreme relative
+  to its recent range and bets on a return toward the average. It deliberately
+  does nothing while the market is trending, because that is exactly where
+  fading extremes is dangerous.
+
+  Entry is gated by a regime filter. The strategy first checks whether price is
+  travelling efficiently in one direction or churning sideways, and only arms
+  itself when the read is sideways. Within a range it opens a long after an
+  unusually deep stretch below the average and a short after an unusually high
+  stretch above it, treating those extremes as overshoots likely to be corrected.
+
+  Exits are what give the strategy its character. A position is closed as soon
+  as price reverts back toward its average, locking in a small, frequent gain —
+  this is why most trades end as winners. Each position also carries a wide
+  protective stop and a time limit, so that on the occasions when a range breaks
+  into a genuine trend the loss is contained and capital is freed rather than
+  held in hope. The intended shape is many small wins punctuated by a smaller
+  number of larger, controlled losses.
+
+  Subscribers can tune leverage and margin budget. Higher leverage amplifies
+  both the steady gains and the occasional drawdowns equally; it does not make
+  the strategy more selective. Margin budget is the per-strategy capital the
+  platform sizes against and uses as the denominator for reported return; treat
+  it as the most you are willing to risk on this Playbook, and adjust it to
+  control position size.
+
+  The strategy underperforms when a range breaks decisively into a sustained
+  trend, when volatility expands sharply, or around gap-driven news, because
+  faded extremes can keep extending against the position until the stop is hit.
+  A high historical win rate is not a promise of profit — the loss profile is
+  asymmetric, and past backtest results never guarantee future performance.
+  Only subscribe with risk you can afford to lose.
+market_type: contract
+trading_symbols: ["BTCUSDT"]
+tags: ["mean-reversion", "range", "scalper", "btc", "contract"]
+
+decision_mode: deterministic
+backtest_support: full
+runtime_profile: deterministic
+execution_mode: signal_only
+follow_trade_supported: false
+
+strategy_config:
+  trading_symbols: ["BTCUSDT"]
+  z_period: 30
+  z_entry: 1.8
+  exit_z: 1.0
+  er_period: 24
+  er_range_max: 0.30
+  atr_period: 14
+  atr_stop_mult: 2.5
+  max_hold_bars: 24
+  trade_size: "0.01"
+  leverage: 3
+  margin_budget: "200"
+
+user_config_schema:
+  trading_symbols:
+    type: array
+    item_type: string
+    default: ["BTCUSDT"]
+    options: ["BTCUSDT", "ETHUSDT", "SOLUSDT"]
+    aliases:
+      btc: BTCUSDT
+      bitcoin: BTCUSDT
+      eth: ETHUSDT
+      ethereum: ETHUSDT
+      sol: SOLUSDT
+    min_items: 1
+    max_items: 1
+    label: "Trading symbol"
+  leverage:
+    type: integer
+    default: 3
+    min: 1
+    max: 10
+    label: "Leverage"
+  margin_budget:
+    type: string
+    default: "200"
+    pattern: "^[0-9]+(\\.[0-9]+)?$"
+    label: "Margin budget USDT"

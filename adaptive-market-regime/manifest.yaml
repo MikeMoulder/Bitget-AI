@@ -1,0 +1,103 @@
+name: adaptive-market-regime
+display_name: "Adaptive Market Regime"
+version: "1.0.0"
+description: "Regime-switching BTC perpetual strategy: trend-follows when trending, mean-reverts when ranging, stays flat when unclear"
+long_description: |
+  This Playbook is an adaptive, regime-switching strategy on BTC perpetual
+  futures, and its central thesis is that no single edge works in every market.
+  It aims to capture two different behaviors with one engine: directional
+  continuation when the market is genuinely trending, and snap-back behavior
+  when the market is chopping inside a range. Rather than forcing one style
+  onto every condition, it first reads how efficiently price is travelling and
+  classifies the current environment before deciding how to act. When the
+  environment is ambiguous, the Playbook deliberately captures nothing and
+  waits, treating cash as a position.
+
+  Entry depends entirely on the detected regime. In a trending regime it enters
+  long when shorter-horizon momentum aligns above the longer-horizon trend, and
+  enters short when that alignment points down, riding the move rather than
+  fighting it. In a ranging regime it inverts its instinct and fades extension:
+  it opens long after price stretches unusually far below its rolling center,
+  and opens short after price stretches unusually far above it, betting on a
+  return toward the mean.
+
+  Exit logic is also regime-aware. A trend position is closed when momentum
+  alignment fades or the regime stops qualifying as a trend, locking in the
+  captured leg instead of insisting the move continues. A range position is
+  closed once price reverts back toward its center or the market shifts out of
+  the ranging regime. Whenever the classifier reads the tape as unclear, open
+  exposure is reduced to flat so the strategy is not caught taking either bet
+  in conditions that favor neither.
+
+  Subscribers can tune a small set of parameters. Raising leverage amplifies
+  both upside and drawdown equally and never makes the engine more selective.
+  Adjusting the margin budget changes how much capital the platform sizes
+  orders against and is the denominator for the reported return. The trading
+  symbol can also be set to a supported pair.
+
+  The strategy underperforms when regimes change faster than the classifier can
+  confirm them, which can produce whipsaw losses at the boundary between trend
+  and range. Sudden gap-driven moves around major news, thin liquidity, and
+  persistent funding dislocation can also hurt it. Past backtest performance
+  never guarantees future results, so only subscribe with risk you can afford
+  to lose.
+market_type: contract
+trading_symbols: ["BTCUSDT"]
+tags: ["adaptive", "regime", "trend", "mean-reversion", "btc", "contract"]
+
+decision_mode: deterministic
+backtest_support: full
+runtime_profile: deterministic
+execution_mode: signal_only
+follow_trade_supported: false
+
+strategy_config:
+  trading_symbols: ["BTCUSDT"]
+  trend_fast: 20
+  trend_slow: 50
+  macro_period: 200
+  er_period: 24
+  er_trend_threshold: 0.52
+  er_range_threshold: 0.16
+  z_period: 24
+  z_entry: 1.8
+  z_exit: 0.4
+  macro_bias_z: 1.0
+  atr_period: 14
+  atr_stop_mult: 2.5
+  atr_trail_mult: 3.0
+  mr_stop_mult: 2.0
+  risk_per_trade: 12.0
+  cooldown_bars: 6
+  leverage: 3
+  margin_budget: "300"
+
+user_config_schema:
+  trading_symbols:
+    type: array
+    item_type: string
+    default: ["BTCUSDT"]
+    options: ["BTCUSDT", "ETHUSDT", "SOLUSDT"]
+    aliases:
+      btc: BTCUSDT
+      bitcoin: BTCUSDT
+      eth: ETHUSDT
+      ethereum: ETHUSDT
+      sol: SOLUSDT
+    min_items: 1
+    max_items: 1
+    label: "Trading symbol"
+  leverage:
+    type: integer
+    default: 3
+    min: 1
+    max: 10
+    aliases:
+      3x: 3
+      5x: 5
+    label: "Leverage"
+  margin_budget:
+    type: string
+    default: "300"
+    pattern: "^[0-9]+(\\.[0-9]+)?$"
+    label: "Margin budget USDT"

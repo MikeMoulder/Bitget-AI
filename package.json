@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@bitget-ai/getagent-skill": "^0.3.3"
+  }
+}

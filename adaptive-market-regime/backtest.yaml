@@ -1,0 +1,48 @@
+venue:
+  name: BINANCE
+  account_type: MARGIN
+  oms_type: NETTING
+  starting_balances:
+    - amount: 100000
+      currency: USDT
+
+strategy:
+  module: strategy
+  class: AdaptiveRegimeStrategy
+  config_class: AdaptiveRegimeStrategyConfig
+  config:
+    order_id_tag: "001"
+    trend_fast: 20
+    trend_slow: 50
+    macro_period: 200
+    er_period: 24
+    er_trend_threshold: 0.52
+    er_range_threshold: 0.16
+    z_period: 24
+    z_entry: 1.8
+    z_exit: 0.4
+    macro_bias_z: 1.0
+    atr_period: 14
+    atr_stop_mult: 2.5
+    atr_trail_mult: 3.0
+    mr_stop_mult: 2.0
+    risk_per_trade: 12.0
+    min_qty: 0.001
+    max_qty: 0.05
+    cooldown_bars: 6
+
+instrument:
+  id: BTCUSDT.BINANCE
+  kind: perpetual
+  raw_symbol: BTCUSDT
+  base_currency: BTC
+  quote_currency: USDT
+  settlement_currency: USDT
+  price_precision: 2
+  size_precision: 3
+  price_increment: "0.01"
+  size_increment: "0.001"
+  lot_size: "0.001"
+  maker_fee: "0.0002"
+  taker_fee: "0.0006"
+  bar_type: BTCUSDT.BINANCE-1-HOUR-LAST-EXTERNAL

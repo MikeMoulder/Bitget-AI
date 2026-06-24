@@ -1,0 +1,39 @@
+venue:
+  name: BINANCE
+  account_type: MARGIN
+  oms_type: NETTING
+  starting_balances:
+    - amount: 100000
+      currency: USDT
+
+strategy:
+  module: strategy
+  class: RangeReversionStrategy
+  config_class: RangeReversionConfig
+  config:
+    order_id_tag: "001"
+    z_period: 30
+    z_entry: 1.8
+    exit_z: 1.0
+    er_period: 24
+    er_range_max: 0.30
+    atr_period: 14
+    atr_stop_mult: 2.5
+    max_hold_bars: 24
+    trade_size: "0.01"
+
+instrument:
+  id: BTCUSDT.BINANCE
+  kind: perpetual
+  raw_symbol: BTCUSDT
+  base_currency: BTC
+  quote_currency: USDT
+  settlement_currency: USDT
+  price_precision: 2
+  size_precision: 3
+  price_increment: "0.01"
+  size_increment: "0.001"
+  lot_size: "0.001"
+  maker_fee: "0.0002"
+  taker_fee: "0.0006"
+  bar_type: BTCUSDT.BINANCE-1-HOUR-LAST-EXTERNAL
